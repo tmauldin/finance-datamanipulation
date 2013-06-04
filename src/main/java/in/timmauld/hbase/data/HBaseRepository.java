@@ -1,4 +1,4 @@
-package in.timmauld.data.hbase.repo;
+package in.timmauld.hbase.data;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -16,35 +16,52 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HBaseRepository {
+public class HBaseRepository implements Repository {
 
 	private Configuration conf = null;
 	private HBaseAdmin admin = null;
-
-	public HBaseRepository() throws IOException {
-		Configuration newConf = HBaseConfiguration.create();
-		this.conf = newConf;
-		this.admin = new HBaseAdmin(conf);
+	private String schemaTable;
+	private String[] schemaColumnFamilies;
+	
+	public HBaseRepository(String schemaTable, String[] schemaColumnFamilies) throws IOException {
+		this(HBaseConfiguration.create(), schemaTable, schemaColumnFamilies);
 	}
 
-	public HBaseRepository(Configuration conf) throws IOException {
+	public HBaseRepository(Configuration conf, String schemaTable, String[] schemaColumnFamilies) throws IOException {
 		this.conf = conf;
 		this.admin = new HBaseAdmin(conf);
+		this.schemaTable = schemaTable;
+		this.schemaColumnFamilies = schemaColumnFamilies;
+		createTableIfNotExists();
+	}
+	
+	public String getTableName() {
+		return schemaTable;
+	}
+	
+	public String[] getColumnFamilyNames() {
+		return schemaColumnFamilies;
 	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#getConfiguration()
+	 */
 	public Configuration getConfiguration() {
 		return conf;
 	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#existsTable(java.lang.String)
+	 */
 	public boolean existsTable(String table) throws IOException {
 		return admin.tableExists(table);
 	}
 
-	public void createTable(String table, String... colfams) throws IOException {
+	private void createTable(String table, String... colfams) throws IOException {
 		createTable(table, null, colfams);
 	}
 
-	public void createTable(String table, byte[][] splitKeys, String... colfams)
+	private void createTable(String table, byte[][] splitKeys, String... colfams)
 			throws IOException {
 		HTableDescriptor desc = new HTableDescriptor(table);
 		for (String cf : colfams) {
@@ -57,11 +74,26 @@ public class HBaseRepository {
 			admin.createTable(desc);
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#createTable(java.lang.String, byte[][], java.lang.String)
+	 */
+	public void createTableIfNotExists() throws IOException {
+		if (!existsTable(schemaTable)) {
+			createTable(schemaTable, schemaColumnFamilies);
+		}
+	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#disableTable(java.lang.String)
+	 */
 	public void disableTable(String table) throws IOException {
 		admin.disableTable(table);
 	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#dropTable(java.lang.String)
+	 */
 	public void dropTable(String table) throws IOException {
 		if (existsTable(table)) {
 			disableTable(table);
@@ -69,6 +101,9 @@ public class HBaseRepository {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#padNum(int, int)
+	 */
 	public String padNum(int num, int pad) {
 		String res = Integer.toString(num);
 		if (pad > 0) {
@@ -79,6 +114,9 @@ public class HBaseRepository {
 		return res;
 	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#getRowByKey(java.lang.String, java.lang.String)
+	 */
 	public Result getRowByKey(String table, String rowKey) throws IOException {
 		Result r = null;
 		HTable tbl = new HTable(conf, table);
@@ -91,35 +129,52 @@ public class HBaseRepository {
 		return r;
 	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#put(java.lang.String, java.lang.String, java.lang.String, java.lang.String, long, java.lang.String)
+	 */
 	public void put(String table, String row, String fam, String qual, long ts,
 			String val) throws IOException {
 		HTable tbl = new HTable(conf, table);
-		Put put = new Put(Bytes.toBytes(row));
-		put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), ts, Bytes.toBytes(val));
-		tbl.put(put);
-		tbl.close();
-	}
-
-	public void put(String table, String[] rows, String[] fams, String[] quals,
-			long[] ts, String[] vals) throws IOException {
-		HTable tbl = new HTable(conf, table);
-		for (String row : rows) {
+		try {
 			Put put = new Put(Bytes.toBytes(row));
-			for (String fam : fams) {
-				int v = 0;
-				for (String qual : quals) {
-					String val = vals[v < vals.length ? v : vals.length - 1];
-					long t = ts[v < ts.length ? v : ts.length - 1];
-					put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), t,
-							Bytes.toBytes(val));
-					v++;
-				}
-			}
+			put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), ts, Bytes.toBytes(val));
 			tbl.put(put);
+		} finally {
+			tbl.close();
 		}
 		tbl.close();
 	}
 
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#put(java.lang.String, java.lang.String[], java.lang.String[], java.lang.String[], long[], java.lang.String[])
+	 */
+	public void put(String table, String[] rows, String[] fams, String[] quals,
+			long[] ts, String[] vals) throws IOException {
+		HTable tbl = new HTable(conf, table);
+		try {
+			for (String row : rows) {
+				Put put = new Put(Bytes.toBytes(row));
+				for (String fam : fams) {
+					int v = 0;
+					for (String qual : quals) {
+						String val = vals[v < vals.length ? v : vals.length - 1];
+						long t = ts[v < ts.length ? v : ts.length - 1];
+						put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), t,
+								Bytes.toBytes(val));
+						v++;
+					}
+				}
+				tbl.put(put);
+			}
+		} finally {
+			tbl.close();
+		}
+		tbl.close();
+	}
+
+	/* (non-Javadoc)
+	 * @see in.timmauld.hbase.data.Repository#dump(java.lang.String, java.lang.String[], java.lang.String[], java.lang.String[])
+	 */
 	public void dump(String table, String[] rows, String[] fams, String[] quals)
 			throws IOException {
 		HTable tbl = new HTable(conf, table);

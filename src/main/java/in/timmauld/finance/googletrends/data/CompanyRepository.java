@@ -1,6 +1,6 @@
 package in.timmauld.finance.googletrends.data;
 
-import in.timmauld.data.hbase.repo.HBaseRepository;
+import in.timmauld.hbase.data.HBaseRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class CompanyRepository extends HBaseRepository {
 	final String QUAL_COMPANY_NAME = "name";
 	
 	public CompanyRepository() throws IOException {
-		super();			
+		super("TAQ_Minute", null);			
 	}
 	
 	public ArrayList<Company> getAllCompanies() throws IOException {

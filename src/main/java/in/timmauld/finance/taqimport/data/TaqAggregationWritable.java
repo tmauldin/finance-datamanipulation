@@ -14,12 +14,13 @@ public class TaqAggregationWritable implements Writable{
 	private String name;
 	private Double highPrice;
 	private Double lowPrice;
-	private Double medPrice;
+	private Double meanPrice;
 	private long numShares;
 	private long numTrades;	
 	private Double highPercentChange;
 	private Double lowPercentChange;
-	private Double medPercentChange;
+	private Double meanPercentChange;
+	private Double variance;
 
 	public TaqAggregationWritable() {
 	}
@@ -64,12 +65,12 @@ public class TaqAggregationWritable implements Writable{
 		this.lowPrice = low;
 	}
 
-	public Double getMedPrice() {
-		return medPrice;
+	public Double getMeanPrice() {
+		return meanPrice;
 	}
 
-	public void setMedPrice(Double med) {
-		this.medPrice = med;
+	public void setMeanPrice(Double mean) {
+		this.meanPrice = mean;
 	}
 
 	public long getNumShares() {
@@ -104,46 +105,53 @@ public class TaqAggregationWritable implements Writable{
 		this.lowPercentChange = lowPercentChange;
 	}
 
-	public Double getMedPercentChange() {
-		return medPercentChange;
+	public Double getMeanPercentChange() {
+		return meanPercentChange;
 	}
 
-	public void setMedPercentChange(Double medPercentChange) {
-		this.medPercentChange = medPercentChange;
+	public void setMeanPercentChange(Double meanPercentChange) {
+		this.meanPercentChange = meanPercentChange;
 	}
 
-	@Override
+	public double getVariance() {
+		return variance;
+	}
+
+	public void setVariance(Double variance) {
+		this.variance = variance;
+	}
+
+	public long getTimeInMinutesSinceEpoch() {
+		long minutesSinceEpoch = time.getTime() / (60 * 1000);
+		return minutesSinceEpoch;
+	}
+
 	public void readFields(DataInput in) throws IOException {
 		time = new Date(in.readLong());
 		ticker = in.readUTF();
 		name = in.readUTF();
 		highPrice = in.readDouble();
 		lowPrice = in.readDouble();
-		medPrice = in.readDouble();
+		meanPrice = in.readDouble();
 		numShares = in.readLong();
 		numTrades = in.readLong();
 		highPercentChange = in.readDouble();
 		lowPercentChange = in.readDouble();
-		medPercentChange = in.readDouble();
+		meanPercentChange = in.readDouble();
+		variance = in.readDouble();
 	}
 
-	@Override
 	public void write(DataOutput out) throws IOException {
 		out.writeLong(getTimeInMinutesSinceEpoch());
 		out.writeUTF(ticker);
 		out.writeUTF(name);
 		out.writeDouble(highPrice);
 		out.writeDouble(lowPrice);
-		out.writeDouble(medPrice);
+		out.writeDouble(meanPrice);
 		out.writeLong(numShares);
 		out.writeLong(numTrades);
 		out.writeDouble(highPercentChange);
 		out.writeDouble(lowPercentChange);
-		out.writeDouble(medPercentChange);
-	}
-	
-	public long getTimeInMinutesSinceEpoch() {
-		long minutesSinceEpoch = time.getTime() / (60 * 1000);
-		return minutesSinceEpoch;
-	}
-}
+		out.writeDouble(meanPercentChange);
+		out.writeDouble(variance);
+	}}
