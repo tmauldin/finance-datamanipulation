@@ -8,6 +8,10 @@ import org.apache.hadoop.hbase.client.Result;
 public interface Repository {
 
 	public Configuration getConfiguration();
+	
+	public String getTableName();
+	
+	public void setTableName(String schemaTable);
 
 	public boolean existsTable(String table) throws IOException;
 

@@ -1,35 +1,39 @@
-package in.timmauld.finance.taqimport.data;
+package in.timmauld.finance.taqimport.data.model;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Date;
-
 import org.apache.hadoop.io.Writable;
 
 public class TaqAggregationWritable implements Writable{	
 	
-	private Date time;
+	private String key;
+	private long time;
 	private String ticker;
-	private String name;
+	private String name = "";
 	private Double highPrice;
 	private Double lowPrice;
 	private Double meanPrice;
 	private long numShares;
 	private long numTrades;	
-	private Double highPercentChange;
-	private Double lowPercentChange;
-	private Double meanPercentChange;
 	private Double variance;
 
 	public TaqAggregationWritable() {
 	}
 	
-	public Date getTime() {
+	public String getKey() {
+		return key;
+	}
+	
+	public void setKey(String key) {
+		this.key = key;
+	}
+	
+	public long getTime() {
 		return time;
 	}
 
-	public void setTime(Date time) {
+	public void setTime(long time) {
 		this.time = time;
 	}
 	
@@ -88,31 +92,7 @@ public class TaqAggregationWritable implements Writable{
 	public void setNumTrades(long numTrades) {
 		this.numTrades = numTrades;
 	}
-
-	public Double getHighPercentChange() {
-		return highPercentChange;
-	}
-
-	public void setHighPercentChange(Double highPercentChange) {
-		this.highPercentChange = highPercentChange;
-	}
-
-	public Double getLowPercentChange() {
-		return lowPercentChange;
-	}
-
-	public void setLowPercentChange(Double lowPercentChange) {
-		this.lowPercentChange = lowPercentChange;
-	}
-
-	public Double getMeanPercentChange() {
-		return meanPercentChange;
-	}
-
-	public void setMeanPercentChange(Double meanPercentChange) {
-		this.meanPercentChange = meanPercentChange;
-	}
-
+	
 	public double getVariance() {
 		return variance;
 	}
@@ -121,13 +101,9 @@ public class TaqAggregationWritable implements Writable{
 		this.variance = variance;
 	}
 
-	public long getTimeInMinutesSinceEpoch() {
-		long minutesSinceEpoch = time.getTime() / (60 * 1000);
-		return minutesSinceEpoch;
-	}
-
 	public void readFields(DataInput in) throws IOException {
-		time = new Date(in.readLong());
+		key = in.readUTF();
+		time = in.readLong();
 		ticker = in.readUTF();
 		name = in.readUTF();
 		highPrice = in.readDouble();
@@ -135,14 +111,12 @@ public class TaqAggregationWritable implements Writable{
 		meanPrice = in.readDouble();
 		numShares = in.readLong();
 		numTrades = in.readLong();
-		highPercentChange = in.readDouble();
-		lowPercentChange = in.readDouble();
-		meanPercentChange = in.readDouble();
 		variance = in.readDouble();
 	}
 
 	public void write(DataOutput out) throws IOException {
-		out.writeLong(getTimeInMinutesSinceEpoch());
+		out.writeUTF(key);
+		out.writeLong(time);
 		out.writeUTF(ticker);
 		out.writeUTF(name);
 		out.writeDouble(highPrice);
@@ -150,8 +124,7 @@ public class TaqAggregationWritable implements Writable{
 		out.writeDouble(meanPrice);
 		out.writeLong(numShares);
 		out.writeLong(numTrades);
-		out.writeDouble(highPercentChange);
-		out.writeDouble(lowPercentChange);
-		out.writeDouble(meanPercentChange);
 		out.writeDouble(variance);
-	}}
+	}
+	
+}

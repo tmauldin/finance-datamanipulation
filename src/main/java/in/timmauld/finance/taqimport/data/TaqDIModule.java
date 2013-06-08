@@ -17,4 +17,5 @@ public class TaqDIModule extends AbstractModule {
 	  TaqTable provideTaqTable() {
 	    return TaqHBaseTable.TAQMinute;
 	  }
+	  
 }

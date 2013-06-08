@@ -39,6 +39,10 @@ public class HBaseRepository implements Repository {
 		return schemaTable;
 	}
 	
+	public void setTableName(String schemaTable) {
+		this.schemaTable = schemaTable;
+	}
+	
 	public String[] getColumnFamilyNames() {
 		return schemaColumnFamilies;
 	}
