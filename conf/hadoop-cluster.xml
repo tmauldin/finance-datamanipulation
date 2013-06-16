@@ -1,0 +1,15 @@
+<? xml version =" 1.0"?>
+<configuration>
+	<property>
+		<name>fs.defaultFS</name>
+		<value>hdfs://death-star:8020</value>
+	</property>
+	<property>
+		<name>mapred.job.tracker</name>
+		<value>jobtracker: 8021</value>
+	</property>
+	<property>
+		<name>dfs.web.ugi</name>
+		<value>hdfs</value>
+	</property>
+</configuration>

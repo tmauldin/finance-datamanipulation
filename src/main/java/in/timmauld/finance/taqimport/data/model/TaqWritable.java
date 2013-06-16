@@ -20,6 +20,10 @@ public class TaqWritable implements Writable{
 	public long getTime() {
 		return time;
 	}
+	
+	public long getTimeInDaysSinceEpoch() {
+		return time / (60 * 24);
+	}
 
 	public void setTime(Date time) {
 		long minutesSinceEpoch = time.getTime() / (60 * 1000);

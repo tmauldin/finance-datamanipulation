@@ -55,8 +55,7 @@ public class TaqHbaseRepository extends HBaseRepository implements TaqRepository
 	public enum VolumeColumn {
 		numtrades, numsharestraded;
 	}
-
-	@Inject
+	
 	public TaqHbaseRepository(TaqTable tableVal) throws IOException {
 		super(tableVal.name(), ColumnFamily.getNames());
 	}
