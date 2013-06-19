@@ -12,8 +12,6 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.google.inject.Inject;
-
 public class TaqHbaseRepository extends HBaseRepository implements TaqRepository {
 	
 	public interface TaqTable {

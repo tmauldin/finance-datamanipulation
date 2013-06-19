@@ -4,8 +4,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
-public class TaqAggregationWritable implements Writable{	
+public class TaqAggregationWritable implements Writable, WritableComparable<TaqAggregationWritable>, Comparable<TaqAggregationWritable>{	
 	
 	private String key;
 	private long time;
@@ -125,6 +126,52 @@ public class TaqAggregationWritable implements Writable{
 		out.writeLong(numShares);
 		out.writeLong(numTrades);
 		out.writeDouble(variance);
+	}
+
+	@Override
+	public int compareTo(TaqAggregationWritable taq) {
+		final int BEFORE = -1;
+		final int EQUAL = 0;
+		final int AFTER = 1;
+
+		if (this == taq) {
+			return EQUAL;
+		}
+		if (this.getTime() < taq.getTime()) {
+			return BEFORE;
+		} else if (this.getTime() > taq.getTime()) {
+			return AFTER;
+		}
+		return EQUAL;
+	}
+	
+	public boolean equals(Object obj) {
+		TaqAggregationWritable taqToCompare = (TaqAggregationWritable)obj;
+		if (this.getNumShares() != taqToCompare.getNumShares()) {
+			return false;
+		}
+		if (this.getTime() != taqToCompare.getTime()) {
+			return false;
+		}
+		if (this.getTicker() != taqToCompare.getTicker()) {
+			return false;
+		}
+		if (this.getLowPrice() != taqToCompare.getLowPrice()) {
+			return false;
+		}
+		if (this.getHighPrice() != taqToCompare.getHighPrice()) {
+			return false;
+		}
+		if (this.getMeanPrice() != taqToCompare.getMeanPrice()) {
+			return false;
+		}
+		
+		return true;			
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int)getTime();
 	}
 	
 }

@@ -5,25 +5,20 @@ package in.timmauld.hadoop.util;
 // White, Tom (2012-05-10). Hadoop: The Definitive Guide (Kindle Locations 5866-5867). O'Reilly Media. Kindle Edition. 
 // https://github.com/tomwhite/hadoop-book/blob/master/common/src/main/java/JobBuilder.java
 
-import in.timmauld.finance.taqimport.main.TaqCheckDuplicatesJob;
+import in.timmauld.finance.taqimport.checkdates.TaqCheckDatesDriver;
 
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
@@ -62,6 +57,22 @@ public class JobBuilder {
 		job.setJarByClass(tool.getClass());
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
+		return job;
+	}
+	
+	public static Job buildBasicJob(Tool tool, Configuration conf,
+			String output, String... inputs) throws IOException {
+
+		if (output.isEmpty() || output == null || inputs == null || inputs.length == 0) {
+			return null;
+		}
+		Job job = new Job(conf);
+		job.setJarByClass(tool.getClass());
+		for (String in : inputs) {
+			FileInputFormat.addInputPath(job, new Path(in));
+		}
+		
+		FileOutputFormat.setOutputPath(job, new Path(output));
 		return job;
 	}
 
@@ -123,7 +134,7 @@ public class JobBuilder {
 		      return null;
 		}
 		
-		decompressJob.setJarByClass(TaqCheckDuplicatesJob.class);
+		decompressJob.setJarByClass(TaqCheckDatesDriver.class);
 	    decompressJob.setInputFormatClass(TextInputFormat.class);		    
 	    decompressJob.setMapperClass(Mapper.class);		    
 	    decompressJob.setMapOutputKeyClass(NullWritable.class);
