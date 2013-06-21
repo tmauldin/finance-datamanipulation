@@ -10,23 +10,23 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class TaqImportMain {
 	
-	private static final Log LOG = LogFactory.getLog(TaqCheckDatesDriver.class);
+	private static final Log LOG = LogFactory.getLog(TaqImportMain.class);
 	
 	public static void main(String[] args) throws Exception {
 		int exitCode = 0;	
 		
-		if (args.length != 2) {
-			System.err.printf("Usage: <action [checkdates | aggregate]> <output>");
+		if (args.length != 3) {
+			System.err.printf("Usage: <action [checkdates | aggregate]> <input> <output>");
 			exitCode = -1;
 			System.exit(exitCode);	
 		}
 		
 		LOG.info("Time Started: " + new Date());
 		
-		if (args[0] == "checkdates") {
-			exitCode = ToolRunner.run(new TaqCheckDatesDriver(), new String[] { args[1] });
-		} else if (args[0] == "aggregate") {
-			exitCode = ToolRunner.run(new TaqAggregatorDriver(), new String[] { args[1] });
+		if (args[0].equals("checkdates")) {
+			exitCode = ToolRunner.run(new TaqCheckDatesDriver(), new String[] { args[1], args[2] });
+		} else if (args[0].equals("aggregate")) {
+			exitCode = ToolRunner.run(new TaqAggregatorDriver(), new String[] { args[1], args[2] });
 		}
 		
 		LOG.info("Time Finished: " + new Date());

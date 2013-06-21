@@ -23,32 +23,31 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 public class TaqCheckDatesDriver extends Configured implements Tool{
-
-	private static final String DATES_PATH = "output/dates";	
+	
 	private static final Log LOG = LogFactory.getLog(TaqCheckDatesDriver.class);
 	
 	public int run(String[] args) throws Exception {
 		
 		Configuration conf = getConf();
 		String compressedDir = args[0];
+		String dateOutput = args[1];
 		FileSystem fs = FileSystem.get(conf);
-		FileStatus[] fss = fs.listStatus(new Path(compressedDir));
-	    
-	    List<String> inputs = new ArrayList<String>();
-		for (FileStatus status : fss) {
-    	
-		    Path path = status.getPath();
-		    if (!path.getName().startsWith(".")) {  
-		    	inputs.add(compressedDir + "/" + path.getName());
-		    }
-		}
-		
-		String dateOutput = DATES_PATH;		
+//		FileStatus[] fss = fs.listStatus(new Path(compressedDir));
+//	    
+//	    List<String> inputs = new ArrayList<String>();
+//		for (FileStatus status : fss) {			
+//		    Path path = status.getPath();
+//		    if (!path.getName().startsWith(".")) {  
+//		    	LOG.info("Adding input file: " + path.getName());
+//		    	inputs.add(compressedDir + "/" + path.getName());
+//		    }
+//		}
+			
 		if (fs.exists(new Path(dateOutput))) {
 	    	FileUtil.fullyDelete(new File(dateOutput));
 	    }
 		
-		Job datesJob = JobBuilder.buildBasicJob(this, conf, dateOutput, inputs.toArray(new String[0]));
+		Job datesJob = JobBuilder.buildBasicJob(this, conf, dateOutput, compressedDir);
 	    if (datesJob == null) { 
 		      return -1;
 		}
@@ -97,13 +96,6 @@ public class TaqCheckDatesDriver extends Configured implements Tool{
 //	    	}
 //	    }
 		return 0;
-	}
-	
-	public static void main(String[] args) throws Exception {
-		LOG.info("Time Started: " + new Date());
-		int exitCode = ToolRunner.run(new TaqCheckDatesDriver(), new String[] { args[0] });
-		LOG.info("Time Finished: " + new Date());
-		System.exit(exitCode);		
 	}
 
 }
