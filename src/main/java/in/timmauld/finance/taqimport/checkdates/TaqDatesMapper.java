@@ -16,15 +16,18 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-public class TaqDatesMapper extends Mapper<Object, Text, LongWritable, Text>{
+public class TaqDatesMapper extends Mapper<LongWritable, Text, LongWritable, Text>{
 	
 	private static DateFormat dateParser = new SimpleDateFormat("yyyyMMdd hh:mm:ss");
 	private static final Log LOG = LogFactory.getLog(TaqDatesMapper.class);
 	private DateBehavior dateBehavior;
 	
 	@Override 
-	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		FileSplit fileSplit = (FileSplit)context.getInputSplit();
+		String filename = fileSplit.getPath().getName();
 		try {
 			TaqWritable taq = new TaqWritable(dateBehavior);
 			StringTokenizer tknz = new StringTokenizer(value.toString(), ",");
@@ -32,13 +35,13 @@ public class TaqDatesMapper extends Mapper<Object, Text, LongWritable, Text>{
 			if (!ticker.equalsIgnoreCase("SYMBOL")) {
 				taq.setTicker(ticker);
 				taq.setTime(dateParser.parse(tknz.nextToken() + " " + tknz.nextToken()));
-				context.write(new LongWritable(taq.getTime()), new Text(taq.getTicker()));		
+				context.write(new LongWritable(taq.getTime()), new Text(taq.getTicker() + "," + filename));		
 			}
 		} catch (ParseException e) {
-			LOG.error("ParseException at text line: " + value);
+			LOG.error("ParseException at text line: " + value + " in file: " + filename);
 			e.printStackTrace();
 		} catch (IOException e) {
-			LOG.error("IOException at text line: " + value);
+			LOG.error("IOException at text line: " + value + " in file: " + filename);
 			e.printStackTrace();
 		}
 	}

@@ -1,6 +1,7 @@
 package in.timmauld.finance.taqimport.aggregator;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,19 +22,19 @@ public class TaqAggregatorReducer extends Reducer<Text, TaqWritable, Text, TaqAg
 		String ticker = "";
 		long time = 0;
 		List<Double> prices = new ArrayList<Double>();
-		double highPrice = 0.0;
- 		double lowPrice = Double.MAX_VALUE;
+		BigDecimal highPrice = new BigDecimal(0.0);
+		BigDecimal lowPrice = new BigDecimal(Double.MAX_VALUE);
  		long numTrades = 0;
  		long numSharesTraded = 0;
 		
  		for (TaqWritable val : values) {
  			ticker = val.getTicker();
  			time = val.getTime();
-			prices.add(val.getPrice());
-			if (val.getPrice() > highPrice) {
+			prices.add(val.getPrice().doubleValue());
+			if (val.getPrice().compareTo(highPrice) > 0) {
 				highPrice = val.getPrice();
 			}
-			if (val.getPrice() < lowPrice) {
+			if (val.getPrice().compareTo(lowPrice) < 0) {
 				lowPrice = val.getPrice();
 			}
 			numTrades++;
@@ -61,7 +62,7 @@ public class TaqAggregatorReducer extends Reducer<Text, TaqWritable, Text, TaqAg
 		result.setTicker(ticker);
 		result.setHighPrice(highPrice);
 		result.setLowPrice(lowPrice);
-		result.setMeanPrice(mean);
+		result.setMeanPrice(new BigDecimal(mean));
 		result.setNumShares(numSharesTraded);
 		result.setNumTrades(numTrades);
 		

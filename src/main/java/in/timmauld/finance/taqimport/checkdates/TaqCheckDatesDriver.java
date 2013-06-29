@@ -32,16 +32,6 @@ public class TaqCheckDatesDriver extends Configured implements Tool{
 		String compressedDir = args[0];
 		String dateOutput = args[1];
 		FileSystem fs = FileSystem.get(conf);
-//		FileStatus[] fss = fs.listStatus(new Path(compressedDir));
-//	    
-//	    List<String> inputs = new ArrayList<String>();
-//		for (FileStatus status : fss) {			
-//		    Path path = status.getPath();
-//		    if (!path.getName().startsWith(".")) {  
-//		    	LOG.info("Adding input file: " + path.getName());
-//		    	inputs.add(compressedDir + "/" + path.getName());
-//		    }
-//		}
 			
 		if (fs.exists(new Path(dateOutput))) {
 	    	FileUtil.fullyDelete(new File(dateOutput));
@@ -65,36 +55,6 @@ public class TaqCheckDatesDriver extends Configured implements Tool{
 	    
 	    datesJob.waitForCompletion(true);
 
-//	    for (FileStatus status : fss) {
-//	    	
-//		    Path path = status.getPath();
-//		    if (!path.getName().startsWith(".")) {    
-//		        String dateOutput = DATES_PATH + "/" + path.getName().replace(".csv.gz", "").replace("/", "_");
-//			    
-//			    if (fs.exists(new Path(dateOutput))) {
-//			    	FileUtil.fullyDelete(new File(dateOutput));
-//			    }
-//			    
-//			    Job datesJob = JobBuilder.parseInputAndOutput(this, conf, 
-//			    		new String[] { compressedDir + "/" + path.getName(), dateOutput });
-//			    if (datesJob == null) { 
-//				      return -1;
-//				}
-//			    
-//			    datesJob.setJarByClass(TaqCheckDatesDriver.class);
-//			    datesJob.setInputFormatClass(TextInputFormat.class);
-//			    datesJob.setMapperClass(TaqDatesMapper.class);
-//			    datesJob.setMapOutputKeyClass(LongWritable.class);
-//			    datesJob.setMapOutputValueClass(Text.class);
-//			    
-//			    datesJob.setReducerClass(TaqDatesReducer.class);		    
-//			    datesJob.setOutputKeyClass(LongWritable.class);
-//			    datesJob.setOutputValueClass(Text.class);
-//			    datesJob.setOutputFormatClass(TextOutputFormat.class);  
-//			    
-//			    datesJob.waitForCompletion(true);
-//	    	}
-//	    }
 		return 0;
 	}
 

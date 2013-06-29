@@ -3,6 +3,8 @@ package in.timmauld.finance.taqimport.aggregator;
 import in.timmauld.finance.taqimport.data.model.TaqAggregationWritable;
 import in.timmauld.finance.taqimport.data.model.TaqReturnsWritable;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,28 +42,27 @@ public class TaqReturnsReducer extends Reducer<Text, TaqAggregationWritable, Tex
 		for (int i = 0; i < taqs.size(); i++) {
 			
 			TaqReturnsWritable currentTaq = taqs.get(i);
-			currentTaq.setHighPercentChange(0.0);
-			currentTaq.setLowPercentChange(0.0);
-			currentTaq.setMeanPercentChange(0.0);
+			currentTaq.setHighPercentChange(new BigDecimal(0.0));
+			currentTaq.setLowPercentChange(new BigDecimal(0.0));
+			currentTaq.setMeanPercentChange(new BigDecimal(0.0));
 			
 			if ( i > 0) {
 				TaqReturnsWritable previousTaq = taqs.get(i - 1);				
 				
 				// Checking for zeroes just in case
-				if (previousTaq.getHighPrice().equals(new Double(0.0))) {
-					currentTaq.setHighPercentChange((currentTaq.getHighPrice() - previousTaq.getHighPrice()) / previousTaq.getHighPrice());
+				if (!previousTaq.getHighPrice().equals(new Double(0.0))) {
+					currentTaq.setHighPercentChange((currentTaq.getHighPrice().subtract(previousTaq.getHighPrice())).divide(previousTaq.getHighPrice(), 2, RoundingMode.HALF_UP));
 				}
-				if (previousTaq.getLowPrice().equals(new Double(0.0))) {
-					currentTaq.setLowPercentChange((currentTaq.getLowPrice() - previousTaq.getLowPrice()) / previousTaq.getLowPrice());
+				if (!previousTaq.getLowPrice().equals(new Double(0.0))) {
+					currentTaq.setLowPercentChange((currentTaq.getLowPrice().subtract(previousTaq.getLowPrice())).divide(previousTaq.getLowPrice(), 2, RoundingMode.HALF_UP));
 				}
-				if (previousTaq.getMeanPrice().equals(new Double(0.0))) {
-					currentTaq.setMeanPercentChange((currentTaq.getMeanPrice() - previousTaq.getMeanPrice()) / previousTaq.getMeanPrice());
+				if (!previousTaq.getMeanPrice().equals(new Double(0.0))) {
+					currentTaq.setMeanPercentChange((currentTaq.getMeanPrice().subtract(previousTaq.getMeanPrice())).divide(previousTaq.getMeanPrice(), 2, RoundingMode.HALF_UP));
 				}								
 			} 		
 			
 			// Write it out
 			StringBuilder toWriteBldr = new StringBuilder();
-			toWriteBldr.append(currentTaq.getKey() + ",");
 			toWriteBldr.append(currentTaq.getTime() + ",");
 			toWriteBldr.append(currentTaq.getTicker() + ",");
 			toWriteBldr.append(currentTaq.getName() + ",");
@@ -73,7 +74,7 @@ public class TaqReturnsReducer extends Reducer<Text, TaqAggregationWritable, Tex
 			toWriteBldr.append(currentTaq.getMeanPercentChange() + ",");
 			toWriteBldr.append(currentTaq.getNumShares() + ",");
 			toWriteBldr.append(currentTaq.getNumTrades() + ",");
-			toWriteBldr.append(currentTaq.getVariance() + ",");
+			toWriteBldr.append(currentTaq.getVariance());
 			
 			context.write(new Text(currentTaq.getKey()), new Text(toWriteBldr.toString()));
 		}

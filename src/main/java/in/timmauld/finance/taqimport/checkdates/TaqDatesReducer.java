@@ -22,7 +22,8 @@ public class TaqDatesReducer extends Reducer<LongWritable, Text, NullWritable, T
 		long timeStamp = key.get() * 60 * 24 * 60 * 1000;
 		Date d = new Date(timeStamp);
 		String tradingDate = dateParser.format(d);
-		context.write(NullWritable.get(), new Text(tradingDate));
+		String filename = values.iterator().next().toString().split(",")[1];
+		context.write(NullWritable.get(), new Text(tradingDate + "," + filename));
 	}
 	
 	@Override

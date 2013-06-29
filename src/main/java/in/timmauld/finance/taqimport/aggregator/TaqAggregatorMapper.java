@@ -5,21 +5,23 @@ import in.timmauld.finance.taqimport.data.model.time.DateBehavior;
 import in.timmauld.finance.taqimport.data.model.time.SecondsBehavior;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
-public class TaqAggregatorMapper extends Mapper<Object, Text, Text, TaqWritable>{
+public class TaqAggregatorMapper extends Mapper<LongWritable, Text, Text, TaqWritable>{
 	
 	static SimpleDateFormat dateParser = new SimpleDateFormat("yyyyMMdd hh:mm:ss");
 	private DateBehavior dateBehavior;
 	
 	@Override 
-	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+	public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 		TaqWritable taq = new TaqWritable(dateBehavior);
 		
 		StringTokenizer tknz = new StringTokenizer(value.toString(), ",");
@@ -31,7 +33,7 @@ public class TaqAggregatorMapper extends Mapper<Object, Text, Text, TaqWritable>
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-			taq.setPrice(Double.parseDouble(tknz.nextToken()));
+			taq.setPrice(new BigDecimal(tknz.nextToken()));
 			taq.setNumShares(Long.parseLong(tknz.nextToken()));
 			tknz.nextToken();
 			int corr = Integer.parseInt(tknz.nextToken());

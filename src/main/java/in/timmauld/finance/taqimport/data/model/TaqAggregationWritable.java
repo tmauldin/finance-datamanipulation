@@ -3,6 +3,10 @@ package in.timmauld.finance.taqimport.data.model;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.math.BigDecimal;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
@@ -12,9 +16,9 @@ public class TaqAggregationWritable implements Writable, WritableComparable<TaqA
 	private long time;
 	private String ticker;
 	private String name = "";
-	private Double highPrice;
-	private Double lowPrice;
-	private Double meanPrice;
+	private BigDecimal highPrice;
+	private BigDecimal lowPrice;
+	private BigDecimal meanPrice;
 	private long numShares;
 	private long numTrades;	
 	private Double variance;
@@ -54,27 +58,27 @@ public class TaqAggregationWritable implements Writable, WritableComparable<TaqA
 		this.name = name;
 	}
 
-	public Double getHighPrice() {
+	public BigDecimal getHighPrice() {
 		return highPrice;
 	}
 
-	public void setHighPrice(Double high) {
+	public void setHighPrice(BigDecimal high) {
 		this.highPrice = high;
 	}
 
-	public Double getLowPrice() {
+	public BigDecimal getLowPrice() {
 		return lowPrice;
 	}
 
-	public void setLowPrice(Double low) {
+	public void setLowPrice(BigDecimal low) {
 		this.lowPrice = low;
 	}
 
-	public Double getMeanPrice() {
+	public BigDecimal getMeanPrice() {
 		return meanPrice;
 	}
 
-	public void setMeanPrice(Double mean) {
+	public void setMeanPrice(BigDecimal mean) {
 		this.meanPrice = mean;
 	}
 
@@ -107,9 +111,9 @@ public class TaqAggregationWritable implements Writable, WritableComparable<TaqA
 		time = in.readLong();
 		ticker = in.readUTF();
 		name = in.readUTF();
-		highPrice = in.readDouble();
-		lowPrice = in.readDouble();
-		meanPrice = in.readDouble();
+		highPrice = new BigDecimal(in.readUTF());
+		lowPrice = new BigDecimal(in.readUTF());
+		meanPrice = new BigDecimal(in.readUTF());
 		numShares = in.readLong();
 		numTrades = in.readLong();
 		variance = in.readDouble();
@@ -120,9 +124,9 @@ public class TaqAggregationWritable implements Writable, WritableComparable<TaqA
 		out.writeLong(time);
 		out.writeUTF(ticker);
 		out.writeUTF(name);
-		out.writeDouble(highPrice);
-		out.writeDouble(lowPrice);
-		out.writeDouble(meanPrice);
+		out.writeUTF(highPrice.toString());
+		out.writeUTF(lowPrice.toString());
+		out.writeUTF(meanPrice.toString());
 		out.writeLong(numShares);
 		out.writeLong(numTrades);
 		out.writeDouble(variance);
@@ -145,24 +149,28 @@ public class TaqAggregationWritable implements Writable, WritableComparable<TaqA
 		return EQUAL;
 	}
 	
+	@Override
 	public boolean equals(Object obj) {
 		TaqAggregationWritable taqToCompare = (TaqAggregationWritable)obj;
 		if (this.getNumShares() != taqToCompare.getNumShares()) {
 			return false;
 		}
+		if (this.getNumTrades() != taqToCompare.getNumTrades()) {
+			return false;
+		}
 		if (this.getTime() != taqToCompare.getTime()) {
 			return false;
 		}
-		if (this.getTicker() != taqToCompare.getTicker()) {
+		if (!this.getTicker().equals(taqToCompare.getTicker())) {
 			return false;
 		}
-		if (this.getLowPrice() != taqToCompare.getLowPrice()) {
+		if (!this.getLowPrice().equals(taqToCompare.getLowPrice())) {
 			return false;
 		}
-		if (this.getHighPrice() != taqToCompare.getHighPrice()) {
+		if (!this.getHighPrice().equals(taqToCompare.getHighPrice())) {
 			return false;
 		}
-		if (this.getMeanPrice() != taqToCompare.getMeanPrice()) {
+		if (!this.getMeanPrice().equals(taqToCompare.getMeanPrice())) {
 			return false;
 		}
 		
@@ -174,4 +182,8 @@ public class TaqAggregationWritable implements Writable, WritableComparable<TaqA
 		return (int)getTime();
 	}
 	
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	}
 }

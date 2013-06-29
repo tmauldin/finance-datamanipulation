@@ -5,15 +5,18 @@ import in.timmauld.finance.taqimport.data.model.time.DateBehavior;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Date;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.hadoop.io.Writable;
 
 public class TaqWritable implements Writable{
 
 	private long time = 0;
 	private String ticker = "";
-	private Double price = 0.0;
+	private BigDecimal price = new BigDecimal(0);
 	private long numShares = 0;
 	private DateBehavior dateBehavior; 
 	
@@ -43,11 +46,11 @@ public class TaqWritable implements Writable{
 		this.ticker = ticker;
 	}		
 
-	public Double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(Double high) {
+	public void setPrice(BigDecimal high) {
 		this.price = high;
 	}
 	
@@ -62,14 +65,14 @@ public class TaqWritable implements Writable{
 	public void readFields(DataInput in) throws IOException {
 		time = in.readLong();
 		ticker = in.readUTF();
-		price = in.readDouble();
+		price = new BigDecimal(in.readUTF());
 		numShares = in.readLong();
 	}
 
 	public void write(DataOutput out) throws IOException {
 		out.writeLong(time);
 		out.writeUTF(ticker);
-		out.writeDouble(price);
+		out.writeUTF(price.toString());
 		out.writeLong(numShares);
 	}
 	
@@ -82,10 +85,10 @@ public class TaqWritable implements Writable{
 		if (this.getTime() != taqToCompare.getTime()) {
 			return false;
 		}
-		if (this.getPrice() != taqToCompare.getPrice()) {
+		if (!this.getPrice().equals(taqToCompare.getPrice())) {
 			return false;
 		}
-		if (this.getTicker() != taqToCompare.getTicker()) {
+		if (!this.getTicker().equals(taqToCompare.getTicker())) {
 			return false;
 		}
 		
@@ -95,5 +98,10 @@ public class TaqWritable implements Writable{
 	@Override
 	public int hashCode() {
 		return (int)getTime();
+	}
+	
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 }
